@@ -6,16 +6,7 @@
   "ai": {
     "binding": "AI"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "cscw_signal_steward",
-      // Replace this with the real D1 database UUID returned by `wrangler d1 create`
-      "database_id": "YOUR_REAL_D1_DATABASE_UUID_HERE",
-      // Required for local Pages development with D1
-      "preview_database_id": "DB"
-    }
-  ],
+
   "vars": {
     "APP_TITLE": "Signal, Edit, Support",
     "APP_SUBTITLE": "A short chat activity about useful public updates, shared editing, and support networks.",
