@@ -6,7 +6,15 @@
   "ai": {
     "binding": "AI"
   },
-
+  
+  "d1_databases": [
+    {
+    "binding": "DB",
+    "database_name": "cscw_signal_steward",
+    "database_id": "4328d5ea-6d84-402d-a762-a83e1f175ba3"
+    }
+  ],
+  
   "vars": {
     "APP_TITLE": "Signal, Edit, Support",
     "APP_SUBTITLE": "A short chat activity about useful public updates, shared editing, and support networks.",
