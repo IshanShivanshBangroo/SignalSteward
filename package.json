@@ -1,0 +1,13 @@
+{
+  "name": "cscw-signal-steward-activity",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Pages activity about public updates, shared editing, and support networks.",
+  "scripts": {
+    "dev": "wrangler pages dev public --ai AI",
+    "deploy": "wrangler pages deploy public --project-name cscw-signal-steward-activity"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

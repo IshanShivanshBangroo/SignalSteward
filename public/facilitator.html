@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal, Edit, Support • Facilitator</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero hero-facilitator">
+        <div>
+          <p class="eyebrow">Facilitator dashboard</p>
+          <h1>Signal, Edit, Support</h1>
+          <p class="byline">Developed by Ishan • Designed by Nicole</p>
+          <p class="subtitle">What it does: turns short chat responses into public stance cards, a visible class wall, and two balanced debate teams.</p>
+        </div>
+        <div class="hero-card">
+          <p class="hero-card-title">Debate question</p>
+          <p>In a fast moving community event, should the system first maximize open signaling, or tighter coordination and selective visibility?</p>
+        </div>
+      </header>
+
+      <main class="grid two-col">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Live controls</h2>
+            <span id="session-id-pill" class="pill">Session</span>
+          </div>
+          <div class="action-row wrap-row">
+            <button id="refresh-button" class="secondary-button">Refresh</button>
+            <button id="assign-button" class="primary-button">Build balanced teams</button>
+            <button id="reset-button" class="danger-button">Reset session</button>
+          </div>
+          <p id="facilitator-status" class="status-box">Waiting for submissions.</p>
+          <div class="count-grid">
+            <div class="count-card">
+              <p class="count-label">Participants</p>
+              <p id="participant-count" class="count-value">0</p>
+            </div>
+            <div class="count-card signal-side">
+              <p class="count-label">Open Signal Team</p>
+              <p id="signal-count" class="count-value">0</p>
+            </div>
+            <div class="count-card steward-side">
+              <p class="count-label">Selective Stewardship Team</p>
+              <p id="steward-count" class="count-value">0</p>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Debate sides</h2>
+            <span class="pill">Ready to read</span>
+          </div>
+          <p class="helper-text"><strong>Open Signal Team:</strong> argue that fast, broad participation helps the community build situational awareness.</p>
+          <p class="helper-text"><strong>Selective Stewardship Team:</strong> argue that verification, coordination, and bounded visibility protect quality and trust.</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Run of show</h2>
+            <span class="pill">Suggested timing</span>
+          </div>
+          <ol class="plain-list numbered">
+            <li>Two minutes to explain the scenario and the debate prompt.</li>
+            <li>Three minutes for participants to chat with the digital friend.</li>
+            <li>One minute to build balanced teams and show the wall.</li>
+            <li>Two minutes for team prep.</li>
+            <li>Two short debate rounds and one final vote.</li>
+          </ol>
+        </section>
+
+        <section class="panel full-span">
+          <div class="panel-head">
+            <h2>How the activity maps to the readings</h2>
+            <span class="pill">Three lenses</span>
+          </div>
+          <div class="lens-grid">
+            <article class="lens-card signal-border">
+              <h3>1. Public updates and situational awareness</h3>
+              <p>The first turn asks what kind of post actually helps people understand a fast moving event. Good answers usually include place, change, and action.</p>
+            </article>
+            <article class="lens-card steward-border">
+              <h3>2. Wikipedia style coordination</h3>
+              <p>The second turn asks how a shared page should be coordinated so more contributors improve quality instead of creating chaos and duplication.</p>
+            </article>
+            <article class="lens-card signal-border">
+              <h3>3. Ties, support, and visibility</h3>
+              <p>The third turn asks which ties matter first and what should stay public or bounded, so students think about reach, trust, and social support together.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel full-span">
+          <div class="panel-head">
+            <h2>Participants and stance cards</h2>
+            <span id="updated-pill" class="pill muted">Not updated</span>
+          </div>
+          <div id="facilitator-table-wrap" class="table-wrap"></div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/facilitator.js"></script>
+  </body>
+</html>
