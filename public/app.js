@@ -1,3 +1,6 @@
+import { openRoom } from './room.js';
+let room;
+let attempt = 0;
 const state = {
   name: '',
   questionIndex: 0,
@@ -105,22 +108,25 @@ function renderWall(items = []) {
 }
 
 async function loadConfig() {
-  const res = await fetch('/api/config');
-  const data = await res.json();
+  const data = await room.request('config');
   state.config = data;
   state.sessionId = data.sessionId;
   els.appTitle.textContent = data.title;
   els.appSubtitle.textContent = data.subtitle;
   els.scenarioText.textContent = data.scenario;
-  els.sessionPill.textContent = `Live ${data.sessionId}`;
+  els.sessionPill.textContent = room.owner ? 'Your room' : 'Classroom';
+  const controls = document.getElementById('room-controls');
+  if (room.owner) {
+    controls.href = room.facilitator;
+    controls.hidden = false;
+  }
 }
 
 async function pollWall() {
   try {
-    const res = await fetch('/api/state');
-    const data = await res.json();
+    const data = await room.request('state');
     renderWall(data.participants || []);
-    const mine = (data.participants || []).find((item) => item.name.toLowerCase() === state.name.toLowerCase());
+    const mine = (data.participants || []).find((item) => item.name === state.name);
     if (mine && state.result && mine.finalGroup && state.result.finalGroup !== mine.finalGroup) {
       state.result = mine;
       renderResult(mine);
@@ -137,7 +143,7 @@ function setComposerEnabled(enabled) {
 }
 
 async function startChat() {
-  state.name = els.participantName.value.trim();
+  state.name = els.participantName.value.trim().slice(0, 50);
   if (!state.name) {
     setStatus('Please enter your name first.');
     return;
@@ -146,6 +152,7 @@ async function startChat() {
     setStatus('The activity is still loading.');
     return;
   }
+  attempt++;
   state.started = true;
   state.completed = false;
   state.transcript = [];
@@ -163,14 +170,13 @@ async function startChat() {
 
 async function sendMessage() {
   const message = els.messageInput.value.trim();
-  if (!message) return;
-  appendMessage('user', message);
-  els.messageInput.value = '';
+  if (!message || !state.started || state.completed || els.sendButton.disabled || state.questionIndex >= 3) return;
+  const current = attempt;
   setComposerEnabled(false);
   setStatus('Thinking about your reply...');
 
   try {
-    const res = await fetch('/api/chat', {
+    const data = await room.request('chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -181,7 +187,9 @@ async function sendMessage() {
         sessionId: state.sessionId
       })
     });
-    const data = await res.json();
+    if (current !== attempt) return;
+    appendMessage('user', message);
+    els.messageInput.value = '';
     appendMessage('assistant', data.reply);
     state.questionIndex = data.nextQuestionIndex;
     if (data.done) {
@@ -192,18 +200,25 @@ async function sendMessage() {
       setStatus(`Nice. Now answer turn ${state.questionIndex + 1}.`);
     }
   } catch {
-    setStatus('The bot did not respond. Please try again.');
+    if (current !== attempt) return;
+    setStatus('Your answer is still in the box. Press Send to try again.');
     setComposerEnabled(true);
   }
 }
 
 async function finishActivity() {
-  if (state.completed) return;
+  if (state.completed || els.finishButton.disabled) return;
+  const current = attempt;
+  state.name = els.participantName.value.trim().slice(0, 50);
+  if (!state.name) {
+    setStatus('Enter a name or nickname before saving the card.');
+    return;
+  }
   setStatus('Evaluating your activity card...');
   els.finishButton.disabled = true;
   setComposerEnabled(false);
   try {
-    const res = await fetch('/api/submit', {
+    const data = await room.request('submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -212,19 +227,21 @@ async function finishActivity() {
         transcript: state.transcript
       })
     });
-    const data = await res.json();
+    if (current !== attempt) return;
     state.result = data.participant;
     state.completed = true;
     renderResult(data.participant);
     setStatus('Saved. Watch the live wall while the facilitator builds balanced teams.');
     await pollWall();
-  } catch {
-    setStatus('Your result could not be saved. Please try Finish again.');
+  } catch (error) {
+    if (current !== attempt) return;
+    setStatus(error.message || 'Your result could not be saved. Please try Finish again.');
     els.finishButton.disabled = false;
   }
 }
 
 function clearLocal() {
+  attempt++;
   state.name = '';
   state.questionIndex = 0;
   state.started = false;
@@ -253,7 +270,13 @@ els.messageInput.addEventListener('keydown', (event) => {
 });
 
 (async function init() {
-  await loadConfig();
+  try {
+    room = await openRoom();
+    await loadConfig();
+  } catch (error) {
+    setStatus(error.message);
+    return;
+  }
   clearLocal();
   state.pollTimer = setInterval(pollWall, 2500);
   await pollWall();

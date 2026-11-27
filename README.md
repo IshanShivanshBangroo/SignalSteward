@@ -23,7 +23,7 @@ The debate prompt is:
 
 ## What to say in class
 
-Students use one shared scenario. The first turn asks what kind of public signal helps people understand what is happening. The second turn asks how a shared page should be coordinated so crowd contribution improves quality instead of causing chaos. The third turn asks which ties matter first and what should stay public or bounded. After the chat, everyone sees names and short public excerpts on the live wall, then the facilitator builds two equal-size teams for the debate.
+Students use one shared scenario. The first turn asks what kind of public signal helps people understand what is happening. The second turn asks how a shared page should be coordinated so crowd contribution improves quality instead of causing chaos. The third turn asks which ties matter first and what should stay public or bounded. After the chat, everyone sees names and short public excerpts on the live wall, then the facilitator builds two teams whose sizes differ by at most one for the debate.
 
 ## Project structure
 
@@ -61,17 +61,7 @@ npm run dev
 
 ## Deploy
 
-Create the Pages project once:
-
-```bash
-npx wrangler pages project create cscw-signal-steward-activity
-```
-
-Deploy:
-
-```bash
-npm run deploy
-```
+The `main` branch is connected to the existing Cloudflare Pages project `signalsteward`. It builds the participant and facilitator views in `public` and the functions in `functions/api` with the configured D1 and Workers AI bindings.
 
 ## Fix for the exact error you saw
 
@@ -101,9 +91,12 @@ Do not use a sample UUID such as `12345678-abcd-1234-abcd-1234567890ab`.
 
 ## Classroom flow
 
-1. Share the participant page.
-2. Students enter names and answer three prompts.
-3. Each result is saved and shown on the live wall.
-4. Open `/facilitator.html`.
-5. Click **Build balanced teams**.
-6. Each team chooses one spokesperson and debates the prompt.
+1. Open `/facilitator` and select **Start a new classroom** for a fresh room.
+2. Share the **Participant invitation** with your class. Students enter names or nicknames and answer three prompts.
+3. Each result is saved and shown on that classroom’s wall. Returning to the facilitator page in the creating browser keeps the room controls available.
+4. Select **Build balanced teams**. The team assignment appears in participant views after the next refresh.
+5. Each team chooses one spokesperson and debates the prompt.
+
+Opening the participant page without an invitation starts or resumes a room for trying the activity. Its facilitator console is available from the participant screen in the creating browser. Participant invitations contain only the room ID.
+
+Existing records from the original classroom remain under its original session ID. The old classroom can be viewed at `/facilitator?room=classroom`. A configured `LEGACY_FACILITATOR_KEY` can authorize its management API. New classrooms work without this setting.

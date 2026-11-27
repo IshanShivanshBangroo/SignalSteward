@@ -1,26 +1,22 @@
+import { readSession, jsonError, canManage } from '../../lib/session.js';
 import { withLabels } from '../../lib/evaluator.js';
 
 export async function onRequestPost(context) {
-  const sessionId = context.env.SESSION_ID || 'signal_edit_support_live';
-  const rows = await context.env.DB.prepare(`
-    SELECT name, stance_score as stanceScore, temporary_lean as temporaryLean
-    FROM participants
-    WHERE session_id = ?
-    ORDER BY stance_score DESC, updated_at ASC
-  `).bind(sessionId).all();
-
-  const participants = rows.results || [];
-  const split = Math.ceil(participants.length / 2);
-  const signalNames = new Set(participants.slice(0, split).map((item) => item.name));
-
-  for (const item of participants) {
-    const finalGroup = signalNames.has(item.name) ? 'signal' : 'stewardship';
-    await context.env.DB.prepare(`
-      UPDATE participants
-      SET final_group = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE session_id = ? AND name = ?
-    `).bind(finalGroup, sessionId, item.name).run();
-  }
+  const sessionId = readSession(context);
+  if (!sessionId) return jsonError('Invalid room link.', 400);
+  if (!await canManage(context, sessionId)) return jsonError('Open this room in its facilitator browser to manage teams.', 403);
+  // Rank and assign against the same snapshot. Tied scores retain entry order.
+  await context.env.DB.prepare(`
+    WITH ranked AS MATERIALIZED (
+      SELECT id, ROW_NUMBER() OVER (ORDER BY stance_score DESC, id ASC) AS position,
+             COUNT(*) OVER () AS total
+      FROM participants WHERE session_id = ?
+    )
+    UPDATE participants SET final_group = (
+      SELECT CASE WHEN position <= (total + 1) / 2 THEN 'signal' ELSE 'stewardship' END
+      FROM ranked WHERE ranked.id = participants.id
+    ) WHERE session_id = ?
+  `).bind(sessionId, sessionId).run();
 
   const updatedRows = await context.env.DB.prepare(`
     SELECT name, public_excerpt as publicExcerpt, short_summary as shortSummary, compliment,

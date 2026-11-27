@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS participants;
-CREATE TABLE participants (
+CREATE TABLE IF NOT EXISTS participants (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id TEXT NOT NULL,
   name TEXT NOT NULL,

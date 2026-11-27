@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "cscw-signal-steward-activity",
+  "name": "signalsteward",
   "compatibility_date": "2026-03-28",
   "pages_build_output_dir": "./public",
   "ai": {
@@ -18,7 +18,7 @@
   "vars": {
     "APP_TITLE": "Signal, Edit, Support",
     "APP_SUBTITLE": "A short chat activity about useful public updates, shared editing, and support networks.",
-    "MODEL_NAME": "@cf/meta/llama-3.1-8b-instruct-fast",
+    "MODEL_NAME": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "SESSION_ID": "signal_edit_support_live"
   }
 }

@@ -1,9 +1,12 @@
+import { readSession, jsonError } from '../../lib/session.js';
 export async function onRequestGet(context) {
+  const sessionId = readSession(context);
+  if (!sessionId) return jsonError('Invalid room link.', 400);
   return Response.json({
     ok: true,
     title: context.env.APP_TITLE || 'Signal, Edit, Support',
     subtitle: context.env.APP_SUBTITLE || 'A short chat activity about useful public updates, Wikipedia-style shared editing, and support networks.',
-    sessionId: context.env.SESSION_ID || 'signal_edit_support_live',
+    sessionId,
     scenario: 'A fast moving community event is unfolding. People are posting short updates, building a Wikipedia-style shared page, and using their networks for help. Your digital guide will ask three short questions about what should be shared, how the shared page should be coordinated, and which ties should be activated.',
     questions: [
       {

@@ -1,7 +1,9 @@
+import { readSession, jsonError } from '../../lib/session.js';
 import { withLabels } from '../../lib/evaluator.js';
 
 export async function onRequestGet(context) {
-  const sessionId = context.env.SESSION_ID || 'signal_edit_support_live';
+  const sessionId = readSession(context);
+  if (!sessionId) return jsonError('Invalid room link.', 400);
   const rows = await context.env.DB.prepare(`
     SELECT name, public_excerpt as publicExcerpt, short_summary as shortSummary, compliment,
            situational_score as situationalScore,
@@ -19,5 +21,5 @@ export async function onRequestGet(context) {
   `).bind(sessionId).all();
 
   const participants = (rows.results || []).map((item) => withLabels(item));
-  return Response.json({ ok: true, sessionId, participants });
+  return Response.json({ ok: true, sessionId, participants }, { headers: {'Cache-Control':'no-store'} });
 }

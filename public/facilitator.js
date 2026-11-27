@@ -1,3 +1,6 @@
+import { openRoom, newRoom } from './room.js';
+let room;
+let requestNumber = 0;
 const els = {
   refreshButton: document.getElementById('refresh-button'),
   assignButton: document.getElementById('assign-button'),
@@ -25,7 +28,7 @@ function setStatus(message) {
 }
 
 function renderTable(participants = [], sessionId = '') {
-  els.sessionIdPill.textContent = `Live ${sessionId}`;
+  els.sessionIdPill.textContent = room.owner ? 'Your classroom' : 'Classroom wall';
   els.updatedPill.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   els.participantCount.textContent = String(participants.length);
   els.signalCount.textContent = String(participants.filter((item) => item.finalGroup === 'signal').length);
@@ -67,34 +70,63 @@ function renderTable(participants = [], sessionId = '') {
 }
 
 async function refreshState() {
-  const res = await fetch('/api/state');
-  const data = await res.json();
-  renderTable(data.participants || [], data.sessionId || 'live');
+  const turn = ++requestNumber;
+  try {
+    const data = await room.request('state');
+    if (turn === requestNumber) {
+      renderTable(data.participants, data.sessionId);
+      return true;
+    }
+  } catch {
+    if (turn === requestNumber) setStatus('The wall could not refresh. Try Refresh again.');
+  }
+  return false;
 }
 
-async function buildTeams() {
-  setStatus('Building balanced teams...');
-  const res = await fetch('/api/assign', { method: 'POST' });
-  const data = await res.json();
-  renderTable(data.participants || [], data.sessionId || 'live');
-  setStatus('Balanced teams are ready.');
-}
-
-async function resetSession() {
-  const confirmed = window.confirm('Reset the session and remove all saved cards?');
-  if (!confirmed) return;
-  setStatus('Clearing session...');
-  await fetch('/api/reset', { method: 'POST' });
-  await refreshState();
-  setStatus('Session cleared.');
+async function changeTeams(action, done) {
+  if (!room?.owner || els.assignButton.disabled) return;
+  if (action === 'reset' && !window.confirm('Remove all saved stance cards from this classroom?')) return;
+  els.assignButton.disabled = true;
+  els.resetButton.disabled = true;
+  try {
+    await room.request(action, {method:'POST'}, true);
+    if (await refreshState()) setStatus(done);
+  } catch (error) { setStatus(error.message); }
+  finally {
+    els.assignButton.disabled = false;
+    els.resetButton.disabled = false;
+  }
 }
 
 els.refreshButton.addEventListener('click', refreshState);
-els.assignButton.addEventListener('click', buildTeams);
-els.resetButton.addEventListener('click', resetSession);
+els.assignButton.addEventListener('click', () => changeTeams('assign','Balanced teams are ready.'));
+els.resetButton.addEventListener('click', () => changeTeams('reset','This classroom’s cards have been cleared.'));
+
+document.getElementById('new-room').addEventListener('click', async () => {
+  const url = new URL('/facilitator', location.origin);
+  url.searchParams.set('room', await newRoom());
+  location.assign(url);
+});
+document.getElementById('copy-link').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(room.participant);
+    setStatus('Participant invitation copied.');
+  } catch {
+    setStatus('Copy the address of the Participant invitation link.');
+  }
+});
 
 (async function init() {
-  await refreshState();
-  setStatus('Live dashboard ready.');
-  setInterval(refreshState, 2500);
+  try {
+    room = await openRoom();
+    document.getElementById('participant-link').href = room.participant;
+    document.getElementById('copy-link').disabled = false;
+    document.getElementById('room-description').textContent = room.owner
+      ? 'Share the participant invitation with your class. This browser holds the facilitator controls for this room.'
+      : 'This is a read-only wall. You can start your own classroom to try the facilitator controls.';
+    els.assignButton.disabled = !room.owner;
+    els.resetButton.disabled = !room.owner;
+    if (await refreshState()) setStatus('Classroom wall ready.');
+    setInterval(refreshState, 2500);
+  } catch (error) { setStatus(error.message); }
 })();

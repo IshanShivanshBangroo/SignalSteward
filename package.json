@@ -5,7 +5,7 @@
   "description": "Cloudflare Pages activity about public updates, shared editing, and support networks.",
   "scripts": {
     "dev": "wrangler pages dev public --ai AI",
-    "deploy": "wrangler pages deploy public --project-name cscw-signal-steward-activity"
+    "deploy": "wrangler pages deploy public --project-name signalsteward"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

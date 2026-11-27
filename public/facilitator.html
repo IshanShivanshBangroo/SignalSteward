@@ -27,10 +27,16 @@
             <h2>Live controls</h2>
             <span id="session-id-pill" class="pill">Session</span>
           </div>
+          <p id="room-description" class="helper-text">Opening classroom…</p>
+          <div class="action-row wrap-row">
+            <a id="participant-link" href="/" target="_blank" rel="noreferrer">Participant invitation</a>
+            <button id="copy-link" class="secondary-button" disabled>Copy participant link</button>
+            <button id="new-room" class="secondary-button">Start a new classroom</button>
+          </div>
           <div class="action-row wrap-row">
             <button id="refresh-button" class="secondary-button">Refresh</button>
-            <button id="assign-button" class="primary-button">Build balanced teams</button>
-            <button id="reset-button" class="danger-button">Reset session</button>
+            <button id="assign-button" disabled class="primary-button">Build balanced teams</button>
+            <button id="reset-button" disabled class="danger-button">Reset session</button>
           </div>
           <p id="facilitator-status" class="status-box">Waiting for submissions.</p>
           <div class="count-grid">
